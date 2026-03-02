@@ -1,0 +1,25 @@
+#builds
+dist/
+node_modules/
+*.tsbuildinfo
+.vite/
+
+# Environmental variables
+.env
+.env.*
+!.env.example
+
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+*.sqlite
+*.db
+
+coverage/
+
+*.sqlite
+*.db
