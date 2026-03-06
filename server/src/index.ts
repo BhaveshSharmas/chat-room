@@ -1,8 +1,9 @@
 import { WebSocketServer, WebSocket } from 'ws'
 
 interface user {
+    socket: WebSocket,
+    name: string,
     roomId: string,
-    socket: WebSocket
 }
 
 let allSocket: user[] = []
@@ -16,22 +17,25 @@ wss.on("connection", (socket) => {
 
 
     socket.on("message", (message) => {
+        console.log(allSocket.length);
+        
 
         //@ts-ignore
         const data = JSON.parse(message as unknown as string)
         console.log(data);
-        
+
 
         if (data.type === 'join') {
 
             allSocket.push(
                 {
                     socket,
+                    name: data.name,
                     roomId: data.roomid
                 }
             )
 
-            console.log(allSocket);
+            console.log(data);
 
         } else if (data.type === "message") {
             let currentRoom = null;
@@ -41,16 +45,29 @@ wss.on("connection", (socket) => {
                 }
             }
 
-            for(let i=0; i<allSocket.length; i++){
-                allSocket[i]?.roomId == currentRoom && allSocket[i]?.socket !== socket ? allSocket[i]?.socket.send(data.message) : ""
-            }
+                allSocket.forEach(u => {
+                    if (u.roomId === currentRoom && u.socket !== socket) {
+                        u.socket.send(JSON.stringify(data)); // send full object
+                    }
+                });
+            // }
+        } else if (data.type === "make") {
+            allSocket.push(
+                {
+                    socket,
+                    name: data.name,
+                    roomId: data.roomid
+                }
+            )
         }
 
 
     })
 
-    socket.on("disconnect",()=>{
+    socket.on("close", () => {
         //@ts-ignore
-        allSocket = allSocket.filter(x => x != socket);
+        allSocket = allSocket.filter(x => x.socket != socket);
+        console.log(allSocket.length);
+        
     })
 })
